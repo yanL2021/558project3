@@ -26,3 +26,5 @@ List of packages needed
 
 Install all the packages
 install.packages(c("shiny", "shinydashboard","shinyWidgets","tidyverse","caret","rsample","rpart","rpart.plot","pROC"))
+
+shiny::runGitHub("558project3App_final", "rstudio")
