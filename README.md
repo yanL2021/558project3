@@ -24,6 +24,5 @@ List of packages needed
 `rpart.plot`
 `pROC`
 
-install.packages(c("shiny", "shinydashboard","shinyWidgets","tidyverse","caret","rsample","rpart","rpart.plot","pROC"))
-
-shiny::runGitHub("558project3", "yanL2021")
+install.packages(c("shiny", "shinydashboard","shinyWidgets","shinybusy", "tidyverse","caret","rsample","rpart","rpart.plot","pROC","mathjaxr"))
+shiny::runGitHub("558project3", "yanL2021",ref = "main")
