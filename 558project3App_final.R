@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(shinybusy)
+library(mathjaxr)
 library(tidyverse)
 library(caret)
 library(rsample)
@@ -51,7 +52,7 @@ ui <- dashboardPage(
              menuSubItem("Plot", tabName = "Plot",icon = icon("play-circle"))
     ),
     menuItem("Modeling",tabName = "Modeling",icon = icon("th"),
-             menuSubItem("ModelingInfo", tabName = "ModelingInfo"),
+             
              checkboxGroupButtons(
                inputId = "allInput",
                label = "Variables in Models:",
@@ -70,6 +71,8 @@ ui <- dashboardPage(
                          value = 0.8,
                          step = 0.01),
              actionButton("Analyze",h5("Analyze!")),
+             
+             menuSubItem("ModelingIntro", tabName = "ModelingInfo",icon = icon("book")),
              menuSubItem("Logistic regression", tabName = "glm",icon = icon("play-circle")),
              menuSubItem("classification tree", tabName = "classification",icon = icon("play-circle")),
              menuSubItem("random forest", tabName = "random_forest",icon = icon("play-circle")),
@@ -115,7 +118,9 @@ img(src = "diabetes.jpg")
       tabItem(tabName = "ModelingInfo", 
               h2("Three modeling approaches:"),
               h3("Logistic Regression"),
-              h4("We try to fit this data with a logistic regression model, since the response, Outcome, is binary. The observations are different patients which are independent of each other. There is no multicollinearity among the predictors based on VIF. Logistic regression is easier to implement, interpret, and very efficient to train.However, Logistic Regression needs that independent variables are linearly related to the log odds (log(p/(1-p)).There are some situations where logistic regression might not perform well. One such situation is complete (or quasi-complete) separation of the data. This situation happens when the outcome variable separates a predictor completely. This leads to perfect prediction of the outcome by the predictor. In such a case, logistic regression may produce unreasonable over-inflated estimates of regression coefficients."),br(),
+              h4("We try to fit this data with a logistic regression model, since the response, Outcome, is binary. The observations are different patients which are independent of each other. There is no multicollinearity among the predictors based on VIF. Logistic regression is easier to implement, interpret, and very efficient to train. Logistic Regression needs that independent variables are linearly related to the log odds. This linear relationship can be written in the following mathematical form:"),
+              uiOutput('formular'),
+              h4("There are some situations where logistic regression might not perform well. One such situation is complete (or quasi-complete) separation of the data. This situation happens when the outcome variable separates a predictor completely. This leads to perfect prediction of the outcome by the predictor. In such a case, logistic regression may produce unreasonable over-inflated estimates of regression coefficients."),br(),
               h3("Classification Tree"),
               h4("One main advantage of Classification Tree is that they can be displayed graphically, and are easily interpreted even by a non-expert - this is especially true for small trees. The reason is that trees are very easy to explain to people since they more closely mirror human decision-making. Also, trees can easily handle categorical predictors without the need to create dummy variables. Since Outcome is binary, we applied a Classification Tree to fit our data. However, there are also some disadvantage of Classification Tree. Small changes in data can vastly change tree. Greedy algorithm necessary and need to prune usually."),br(),
               h3("Random Forest"),
@@ -254,6 +259,12 @@ server <- function(input, output, session) {
     )
   })
   
+  
+  output$formular <- renderUI({
+    withMathJax(
+      helpText('
+               $$\\log {\\frac {p}{1-p}}=\\beta _{0}+\\beta x$$'))
+  })
   
   #create a new dataset with selected variables
   Data_model<-eventReactive(input$Analyze,{
