@@ -1,6 +1,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
+library(shinybusy)
 library(tidyverse)
 library(caret)
 library(rsample)
@@ -11,24 +12,26 @@ library(pROC)
 data_whole<-read_csv("diabetes_g.csv")
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Diabetes Prediction"),
+    dashboardHeader(title = "Diabetes Prediction"),
   
+
+    
   ## Sidebar content
   dashboardSidebar(sidebarMenu(
+    add_busy_spinner(spin = "radar",position="full-page"),
     menuItem("About",tabName = "About",icon = icon("address-card")),
     menuItem("Data Exploration",tabName = "Data Exploration",icon = icon("th"),
              #data select
              selectizeInput(
                inputId ="select1",
                "Select a variable",
-               choices = names(data_whole)
+               choices = names(data_whole[-9])
              ),
              sliderInput(inputId = "slider1",
                          label = "filter",
                          min = 1,
                          max = 5,
-                         value = 1,
-                         step = 1),
+                         value = c(1,5)),
              #summary
              radioButtons(
                "RB1",
@@ -83,9 +86,17 @@ ui <- dashboardPage(
     tabItems(
       #About
       tabItem(tabName = "About",
-              h4("Pima Indians Diabetes Database"),
-              br(),
-              h5("Predict the onset of diabetes based on diagnostic measures")),
+              h3("Purpose: Predict the onset of diabetes based on diagnostic measures"),br(),
+              h3("Data Source: Pima Indians Diabetes Database"),
+              h4("The dataset is originally from the National Institute of Diabetes and Digestive and Kidney Diseases. The objective of the dataset is to diagnostically predict whether or not a patient has diabetes, based on certain diagnostic measurements included in the dataset. Several constraints were placed on the selection of these instances from a larger database. In particular, all patients here are females at least 21 years old of Pima Indian heritage."),
+              tags$a(href="https://www.kaggle.com/uciml/pima-indians-diabetes-database","Pima Indians Diabetes Database"),
+              h3("App functions:"),
+h4("1. Exploratory data analysis of the dataset"),
+h4("2. Compare the performance of three models in predicting whether or not the patients in the dataset have diabetes or not."),
+h4("3. Predict the probability of a patient have diabetes by user input values"),
+h4("4. Save the data used in modeling as a csv file."),
+img(src = "diabetes.jpg")
+              ),
       #replace title = "Summary"
       tabItem(tabName = "Summary",
               h2("Summary for Data Exploration"),
@@ -102,10 +113,18 @@ ui <- dashboardPage(
                     plotOutput("dataPlot")))),
       
       tabItem(tabName = "ModelingInfo", 
-              h2("ModelingInfo")),
+              h2("Three modeling approaches:"),
+              h3("Logistic Regression"),
+              h4("We try to fit this data with a logistic regression model, since the response, Outcome, is binary. The observations are different patients which are independent of each other. There is no multicollinearity among the predictors based on VIF. Logistic regression is easier to implement, interpret, and very efficient to train.However, Logistic Regression needs that independent variables are linearly related to the log odds (log(p/(1-p)).There are some situations where logistic regression might not perform well. One such situation is complete (or quasi-complete) separation of the data. This situation happens when the outcome variable separates a predictor completely. This leads to perfect prediction of the outcome by the predictor. In such a case, logistic regression may produce unreasonable over-inflated estimates of regression coefficients."),br(),
+              h3("Classification Tree"),
+              h4("One main advantage of Classification Tree is that they can be displayed graphically, and are easily interpreted even by a non-expert - this is especially true for small trees. The reason is that trees are very easy to explain to people since they more closely mirror human decision-making. Also, trees can easily handle categorical predictors without the need to create dummy variables. Since Outcome is binary, we applied a Classification Tree to fit our data. However, there are also some disadvantage of Classification Tree. Small changes in data can vastly change tree. Greedy algorithm necessary and need to prune usually."),br(),
+              h3("Random Forest"),
+              h4("Random Forest is based on the bagging algorithm and uses Ensemble Learning technique. Random forests provide an improvement over bagging by decorrelating the trees. It forces each split to consider only a subset of the predictors. 
+                 Random Forest algorithm is very stable. Even if a new data point is introduced in the dataset, the overall algorithm is not affected much since the new data may impact one tree, but it is very hard for it to impact all the trees.
+                 A disadvantage of random forest is that the resulting model is often difficult or impossible to interpret, as we are averaging many trees rather than looking at a single tree. We can still compute variable importance scores.")),
       
       tabItem(tabName = "glm", 
-              h3("Generalized linear regression Fit statistics on the training data"),
+              h3("Logistic regression Fit statistics on the training data"),
               fluidRow(
                 box(title = "",  width = 10,  
                     solidHeader = TRUE, collapsible = FALSE,
@@ -155,7 +174,8 @@ ui <- dashboardPage(
                   tableOutput("predication")))),
 
       tabItem(tabName = "Output",
-              h2("Selected data in the process of modeling"),
+              h2("The data being used during modeling"),br(),
+              h3("Please subset the data in modeling menu"),
               fluidRow(box(title = "",  width = 10, length=10, 
                            solidHeader = TRUE, collapsible = TRUE,
                            tableOutput("Data_Output"))),
@@ -176,7 +196,7 @@ server <- function(input, output, session) {
   observe({updateSliderInput(session, inputId = "slider1", 
                     min = min(select(data_whole,input$select1)),
                     max = max(select(data_whole,input$select1)),
-                    value = max(select(data_whole,input$select1)))})
+                    value =c(min(select(data_whole,input$select1)),max(select(data_whole,input$select1)) ))})
   #get new data based on the selected variable
   getData <- reactive({
     
@@ -375,8 +395,8 @@ server <- function(input, output, session) {
   #Performance table
   output$performance <- renderTable({
     #bind accuracy and auc of ROC
-    accuracy<-rbind(logistic[[2]],tree()[[3]],rf()[[2]])
-    auc<-rbind(logistic[[3]],tree()[[4]],rf()[[3]])
+    accuracy<-rbind(logistic()[[2]],tree()[[3]],rf()[[2]])
+    auc<-rbind(logistic()[[3]],tree()[[4]],rf()[[3]])
     performance<-as.data.frame(cbind(accuracy,auc))
     colnames(performance)<-c("accuracy","auc")
     rownames(performance)<-c("glm", "tree","randomForest")
