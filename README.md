@@ -17,12 +17,14 @@ List of packages needed
 `shiny`
 `shinydashboard`
 `shinyWidgets`
+`shinybusy'
 `tidyverse`
 `caret`
 `rsample`
 `rpart`
 `rpart.plot`
 `pROC`
+`mathjaxr`
 
 install.packages(c("shiny", "shinydashboard","shinyWidgets","shinybusy", "tidyverse","caret","rsample","rpart","rpart.plot","pROC","mathjaxr"))
 shiny::runGitHub("558project3", "yanL2021",ref = "main")
