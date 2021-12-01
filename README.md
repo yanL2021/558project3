@@ -17,7 +17,7 @@ List of packages needed
 `shiny`
 `shinydashboard`
 `shinyWidgets`
-`shinybusy'
+`shinybusy`
 `tidyverse`
 `caret`
 `rsample`
