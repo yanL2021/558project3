@@ -65,7 +65,7 @@ ui <- dashboardPage(
                                 choices = names(data_whole[,-9])
              ),
              sliderInput(inputId = "split",
-                         label = "proportion of data",
+                         label = "proportion of data for training",
                          min = 0,
                          max = 1,
                          value = 0.8,
@@ -189,15 +189,22 @@ img(src = "diabetes.jpg")
                   tableOutput("predication")))),
 
       tabItem(tabName = "Output",
-              h2("The data being used during modeling"),br(),
-              h3("Please subset the data in modeling menu"),
-              fluidRow(box(title = "",  width = 10, length=10, 
-                           solidHeader = TRUE, collapsible = TRUE,
-                           tableOutput("Data_Output"))),
+              h2("The data being used during modeling step above"),br(),
+              h3("Please select varaibles in modeling menu"),
+              selectizeInput(
+                inputId ="select2",
+                "Select a data set",
+                choices = c("data_selected", "train", "test"),
+                selected = "data_selected"
+              ),
               downloadButton(
                 outputId = "downloadData",
                 label = "Save as a csv",
-                icon = icon("download")))
+                icon = icon("download")),
+              fluidRow(box(title = "",  width = 10, length=10, 
+                           solidHeader = TRUE, collapsible = TRUE,
+                           tableOutput("Data_Output")))
+             )
     )
   )
   
@@ -216,7 +223,7 @@ server <- function(input, output, session) {
   getData <- reactive({
     
     data_whole$Outcome<-as.factor(data_whole$Outcome)
-    newData <- data_whole %>% filter(!!sym(input$select1) <= input$slider1)
+    newData <- data_whole %>% filter(!!sym(input$select1) <= input$slider1[2] & !!sym(input$select1) >= input$slider1[1])
   })
   
   #summary table
@@ -438,18 +445,24 @@ server <- function(input, output, session) {
     
   })
   
+  Data_print<-reactive({
+    if (input$select2=="data_selected"){Data_model()[[3]]}
+    else if (input$select2=="train"){Data_model()[[1]]}
+    else if (input$select2=="test"){Data_model()[[2]]}
+  })
+  
   #modeling data output
   output$Data_Output<- renderTable({
-    Data_model()[[3]]
+    Data_print()
     
   })
   
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste("OutputData", Sys.Date(), ".csv", sep = "")
+      paste("OutputData", "_", input$select2, "_", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      write_csv(Data_model()[[3]], file)
+      write_csv(Data_print(), file)
     }
   )
 
