@@ -93,6 +93,16 @@ ui <- dashboardPage(
               h3("Data Source: Pima Indians Diabetes Database"),
               h4("The dataset is originally from the National Institute of Diabetes and Digestive and Kidney Diseases. The objective of the dataset is to diagnostically predict whether or not a patient has diabetes, based on certain diagnostic measurements included in the dataset. Several constraints were placed on the selection of these instances from a larger database. In particular, all patients here are females at least 21 years old of Pima Indian heritage."),
               tags$a(href="https://www.kaggle.com/uciml/pima-indians-diabetes-database","Pima Indians Diabetes Database"),
+              h4("Data consist of 768 observations and 8 predictors. The last column is outcome coded as a class variable. 0 means patients do not have diabetes, and 1 means patient has diabetes. 8 predictors are elaborated below:"),
+              h4("Pregnancies: Number of times pregnant"),
+              h4("Glucose: Plasma glucose concentration a 2 hours in an oral glucose tolerance test"),
+              h4("Blood Pressure: Diastolic blood pressure (mmHg)"),
+              h4("Skin Thickness: Triceps skinfold thickness (mm)"),
+              h4("Insulin: 2-Hour serum insulin (mu U/ml)"),
+              h4("BMI: Body mass index (kg/m2)"),
+              h4("Diabetes pedigree function"),
+              h4("Age: Age of the patient in years"),
+              br(),
               h3("App functions:"),
 h4("1. Exploratory data analysis of the dataset"),
 h4("2. Compare the performance of three models in predicting whether or not the patients in the dataset have diabetes or not."),
@@ -231,12 +241,13 @@ server <- function(input, output, session) {
     
     newData <- getData()
     
-    if(input$RB2=="Density"){
+    if (input$RB2 == "Density") {
       g1 <- ggplot(newData, aes(x = !!sym(input$select1), fill = Outcome))
-      g1 + geom_density(alpha = 0.5) +labs(y = "Density", x = input$select1) + theme_bw() + theme(legend.position = "none")
-    }else if(input$RB2=="Boxplot"){
-      g2 <- ggplot(newData, aes(x = Outcome, y = !!sym(input$select1))) 
-      g2 + geom_boxplot(aes(fill = Outcome)) + theme_bw() + theme(legend.position = "none") + labs(y = input$select1)
+      g1 + geom_density(alpha = 0.5) + labs(y = "Density", x = input$select1) + theme_bw()+ scale_fill_discrete(name = NULL,
+                            labels = c("non diabetes", "diabetes"))
+    } else if (input$RB2 == "Boxplot") {
+      g2 <- ggplot(newData, aes(x = Outcome, y = !!sym(input$select1)))
+      g2 + geom_boxplot(aes(fill = Outcome)) + theme_bw() + labs(y = input$select1) + scale_fill_discrete(name =NULL,labels = c("non diabetes", "diabetes"))
     }
   })
   
