@@ -27,5 +27,5 @@ List of packages needed
 `mathjaxr`
 
 **Please run the code below in R to access the Shiny App:**<br />
-install.packages(c("shiny", "shinydashboard", "shinyWidgets", "shinybusy", "tidyverse", "caret", "rsample", "rpart", "rpart.plot", "pROC", "mathjaxr"))
+install.packages(c("shiny", "shinydashboard", "shinyWidgets", "shinybusy", "tidyverse", "caret", "rsample", "rpart", "rpart.plot", "pROC", "mathjaxr"))<br />
 shiny::runGitHub("558project3", "yanL2021",ref = "main")
